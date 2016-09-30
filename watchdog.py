@@ -53,12 +53,12 @@ def main():
 
     user = os.environ['BOT_MAIL_USER']
     password = os.environ['BOT_MAIL_PASSWORD']
-    dest_address = os.environ['BOT_DEST_ADDRESS']
+    dest_address = os.environ['BOT_DEST_ADDRESS'].split(',')
     host = os.environ['BOT_SERVER']
 
     msg = MIMEMultipart()
     msg['From'] = user
-    msg['To'] = dest_address
+    msg['To'] = dest_address[0]
     msg['Subject'] = datetime.now().strftime("Aktualizacje danepubliczne.gov.pl z %d-%m-%Y")
 
     msg.attach(MIMEText(content, 'html'))
@@ -67,7 +67,8 @@ def main():
     if user and password:
         server.login(user, password)
 
-    server.sendmail(user, dest_address, msg.as_string())
+    for dest in dest_address:
+        server.sendmail(user, dest, msg.as_string())
     backup_message(msg)
     server.quit()
     map(modified_store.update, fresh_resources)
