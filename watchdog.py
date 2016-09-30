@@ -14,7 +14,7 @@ from lib.stores import DescriptionStore, ModifiedStore
 
 USER_AGENT = 'ckan-watchdog/0.1 (+https://github.com/ad-m/ckan-watchdog)'
 CKAN_URL = 'https://danepubliczne.gov.pl/'
-
+ROOT = os.path.dirname(__file__)
 
 def get_fresh_resources(ckan, modified_store):
     resource_list = ckan.action.package_search(sort='metadata_modified asc', rows=50)['results']
@@ -26,11 +26,17 @@ def get_diff_resources(fresh_resources, description_store):
 
 
 def get_content(fresh_resources, diff_resources):
-    loader = FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates'))
+    loader = FileSystemLoader(os.path.join(ROOT, 'templates'))
     environment = Environment(loader=loader, trim_blocks=True)
     template = environment.get_template('content.html.j2')
     return template.render(resources=zip(fresh_resources, diff_resources),
                            ckan_url=CKAN_URL).encode('utf-8')
+
+
+def backup_message(msg):
+    filename = datetime.now().strftime('%Y-%m-%d-%s.eml')
+    filepath = os.path.join(os.path.join(ROOT, 'backups'), filename)
+    open(filepath, 'wb').write(msg.as_string())
 
 
 def main():
@@ -62,8 +68,8 @@ def main():
         server.login(user, password)
 
     server.sendmail(user, dest_address, msg.as_string())
+    backup_message(msg)
     server.quit()
-
     map(modified_store.update, fresh_resources)
     map(description_store.update, fresh_resources)
     store.dump()

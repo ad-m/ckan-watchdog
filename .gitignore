@@ -1,3 +1,4 @@
 data.db
 *.pyc
 env
+backups/*.html
