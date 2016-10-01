@@ -1,4 +1,5 @@
-import os
+from os.path import dirname, join
+from os import environ
 import smtplib
 import sys
 from datetime import datetime
@@ -14,7 +15,8 @@ from lib.stores import DescriptionStore, ModifiedStore
 
 USER_AGENT = 'ckan-watchdog/0.1 (+https://github.com/ad-m/ckan-watchdog)'
 CKAN_URL = 'https://danepubliczne.gov.pl/'
-ROOT = os.path.dirname(__file__)
+ROOT = dirname(__file__)
+
 
 def get_fresh_resources(ckan, modified_store):
     resource_list = ckan.action.package_search(sort='metadata_modified asc', rows=50)['results']
@@ -26,7 +28,7 @@ def get_diff_resources(fresh_resources, description_store):
 
 
 def get_content(fresh_resources, diff_resources):
-    loader = FileSystemLoader(os.path.join(ROOT, 'templates'))
+    loader = FileSystemLoader(join(ROOT, 'templates'))
     environment = Environment(loader=loader, trim_blocks=True)
     template = environment.get_template('content.html.j2')
     return template.render(resources=zip(fresh_resources, diff_resources),
@@ -35,13 +37,13 @@ def get_content(fresh_resources, diff_resources):
 
 def backup_message(msg):
     filename = datetime.now().strftime('%Y-%m-%d-%s.eml')
-    filepath = os.path.join(os.path.join(ROOT, 'backups'), filename)
+    filepath = join(join(ROOT, 'backups'), filename)
     open(filepath, 'wb').write(msg.as_string())
 
 
 def main():
     ckan = RemoteCKAN(CKAN_URL, user_agent=USER_AGENT)
-    store = pickledb.load('data.db', False)
+    store = pickledb.load(join(ROOT, 'data.db'), False)
     modified_store = ModifiedStore(store)
     description_store = DescriptionStore(store)
 
@@ -51,10 +53,10 @@ def main():
     diff_resources = get_diff_resources(fresh_resources, description_store)
     content = get_content(fresh_resources, diff_resources)
 
-    user = os.environ['BOT_MAIL_USER']
-    password = os.environ['BOT_MAIL_PASSWORD']
-    dest_address = os.environ['BOT_DEST_ADDRESS'].split(',')
-    host = os.environ['BOT_SERVER']
+    user = environ['BOT_MAIL_USER']
+    password = environ['BOT_MAIL_PASSWORD']
+    dest_address = environ['BOT_DEST_ADDRESS'].split(',')
+    host = environ['BOT_SERVER']
 
     msg = MIMEMultipart()
     msg['From'] = user
