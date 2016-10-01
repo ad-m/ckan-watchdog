@@ -27,12 +27,12 @@ def get_diff_resources(fresh_resources, description_store):
     return map(description_store.diff, fresh_resources)
 
 
-def get_content(fresh_resources, diff_resources):
+def get_content(**context):
     loader = FileSystemLoader(join(ROOT, 'templates'))
     environment = Environment(loader=loader, trim_blocks=True)
     template = environment.get_template('content.html.j2')
-    return template.render(resources=zip(fresh_resources, diff_resources),
-                           ckan_url=CKAN_URL).encode('utf-8')
+    return template.render(ckan_url=CKAN_URL,
+                           **context).encode('utf-8')
 
 
 def backup_message(msg):
@@ -51,7 +51,8 @@ def main():
     if not fresh_resources:
         sys.exit()
     diff_resources = get_diff_resources(fresh_resources, description_store)
-    content = get_content(fresh_resources, diff_resources)
+    resources = zip(fresh_resources, diff_resources)
+    content = get_content(resources=resources)
 
     user = environ['BOT_MAIL_USER']
     password = environ['BOT_MAIL_PASSWORD']
