@@ -1,4 +1,6 @@
 data.db
 *.pyc
+*.csv
 env
 backups/*.eml
+cache.sqlite
