@@ -18,18 +18,18 @@ CKAN_URL = 'https://danepubliczne.gov.pl/'
 ROOT = dirname(__file__)
 
 
-def packages_generator(self, per_page=100):
+def packages_generator(ckan, per_page=100):
     offset = 0
     packages = []
     while offset == 0 or packages:
-        packages = self.ckan.action.package_search(start=offset, rows=per_page)['results']
+        packages = ckan.action.package_search(start=offset, rows=per_page)['results']
         for result in packages:
             yield result
         offset += per_page
 
 
 def get_fresh_resources(ckan, modified_store):
-    resource_list = packages_generator()
+    resource_list = packages_generator(ckan)
     return filter(modified_store.if_fresh_resource, resource_list)
 
 
