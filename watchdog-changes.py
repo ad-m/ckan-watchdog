@@ -51,6 +51,12 @@ def backup_message(msg):
     open(filepath, 'wb').write(msg.as_string())
 
 
+def backup_content(content):
+    filename = datetime.now().strftime('%Y-%m-%d-%s.html')
+    filepath = join(join(ROOT, 'backups'), filename)
+    open(filepath, 'wb').write(content)
+
+
 def main():
     ckan = RemoteCKAN(CKAN_URL, user_agent=USER_AGENT)
     store = pickledb.load(join(ROOT, 'data.db'), False)
@@ -82,8 +88,11 @@ def main():
 
     for dest in dest_address:
         server.sendmail(user, dest, msg.as_string())
-    backup_message(msg)
     server.quit()
+
+    backup_message(msg)
+    backup_content(content)
+
     map(modified_store.update, fresh_resources)
     map(description_store.update, fresh_resources)
     store.dump()

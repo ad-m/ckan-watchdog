@@ -1,6 +1,7 @@
 import collections
-from difflib import HtmlDiff
 from pprint import pformat
+
+from simplediff import html_diff
 
 
 def convert(dictionary):
@@ -40,8 +41,8 @@ class DescriptionStore(AbstractStore):
 
     def diff(self, resource):
         prev = self.get(resource)
-        return HtmlDiff().make_table(pformat(convert(prev)).split("\n"),
-                                     pformat(convert(resource)).split("\n"))
+        return html_diff(pformat(convert(prev).replace("\n", "<br>")),
+                         pformat(convert(resource)).replace("\n", "<br>"))
 
     def update(self, resource):
         self.store.set(self.key(resource), resource)

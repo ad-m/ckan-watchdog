@@ -1,3 +1,4 @@
 ckanapi==3.6
 pickledb==0.6.2
 jinja2==2.8
+simplediff==1.0
