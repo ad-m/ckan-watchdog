@@ -1,5 +1,15 @@
-from pprint import pformat
+import collections
 from difflib import HtmlDiff
+from pprint import pformat
+
+
+def convert(dictionary):
+    """Recursively converts dictionary keys to strings."""
+    if isinstance(dictionary, collections.Mapping):
+        return {str(k): convert(v) for k, v in dictionary.iteritems()}
+    elif isinstance(dictionary, str):
+        return unicode(dictionary, errors='replace')
+    return dictionary
 
 
 class AbstractStore(object):
@@ -30,8 +40,8 @@ class DescriptionStore(AbstractStore):
 
     def diff(self, resource):
         prev = self.get(resource)
-        return HtmlDiff().make_table(pformat(prev).split("\n"),
-                                     pformat(resource).split("\n"))
+        return HtmlDiff().make_table(pformat(convert(prev)).split("\n"),
+                                     pformat(convert(resource)).split("\n"))
 
     def update(self, resource):
         self.store.set(self.key(resource), resource)
