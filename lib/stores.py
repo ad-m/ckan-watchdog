@@ -41,8 +41,13 @@ class DescriptionStore(AbstractStore):
 
     def diff(self, resource):
         prev = self.get(resource)
-        return html_diff(pformat(convert(prev).replace("\n", "<br>")),
-                         pformat(convert(resource)).replace("\n", "<br>"))
+        prev = pformat(convert(prev))
+        prev = prev.replace("\n", "<br>")
+
+        resource = pformat(convert(resource))
+        resource = resource.replace("\n", "<br>")
+
+        return html_diff(prev, resource)
 
     def update(self, resource):
         self.store.set(self.key(resource), resource)
