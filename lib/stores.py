@@ -1,7 +1,7 @@
 import collections
 from pprint import pformat
 
-from simplediff import string_diff
+from simplediff import html_diff
 
 
 def convert(dictionary):
@@ -39,12 +39,6 @@ class DescriptionStore(AbstractStore):
     def get(self, resource):
         return self.store.get(self.key(resource)) or "(empty)"
 
-    def html_diff(old, new):
-        con = {'=': (lambda x: x),
-               '+': (lambda x: '<font color="green">' + x + "</font>"),
-               '-': (lambda x: '<font color="red">' + x + "</font>")}
-        return " ".join([(con[a])(" ".join(b)) for a, b in string_diff(old, new)])
-
     def diff(self, resource):
         prev = self.get(resource)
         prev = pformat(convert(prev))
@@ -53,7 +47,7 @@ class DescriptionStore(AbstractStore):
         resource = pformat(convert(resource))
         resource = resource.replace("\n", "<br>")
 
-        return self.html_diff(prev, resource)
+        return html_diff(prev, resource)
 
     def update(self, resource):
         self.store.set(self.key(resource), resource)
